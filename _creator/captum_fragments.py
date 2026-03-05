@@ -1,5 +1,8 @@
-# Code in this file originates from captum's optim-wip branch:
+# Portions of this file are derived from Captum (PyTorch), from the optim-wip branch:
 # https://github.com/pytorch/captum/tree/optim-wip
+#
+# Original code: Copyright (c) 2019, PyTorch team
+# Licensed under the BSD 3-Clause License. See LICENSES/BSD-3-Clause-Captum.txt.
 
 
 import torch

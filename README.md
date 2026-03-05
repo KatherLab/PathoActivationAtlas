@@ -46,3 +46,8 @@ Start the viewer via `python view.py`. Click on "Open new file", navigate to a p
 
 * GUI icons (`_viewer/_resources/*.svg`, `_annotator/_resources/*.svg`) for the viewer and annotator components from [fontawesome.com](https://fontawesome.com/icons).
 * Code in `_creator/captum_fragments.py` from [Captum's optim-wip branch](https://github.com/meta-pytorch/captum/tree/optim-wip).
+
+
+## License
+
+This project includes third-party code from Captum (PyTorch), licensed under the BSD 3-Clause License. See `LICENSES/BSD-3-Clause-Captum.txt`
