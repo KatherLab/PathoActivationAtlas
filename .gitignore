@@ -1,0 +1,18 @@
+.idea
+.ipynb_checkpoints
+
+__pycache__
+lucent-notebooks
+saved/
+config/csv
+_dependencies/mamba-1p1p1
+
+Thumbs.db
+*.sh
+
+# pyinstaller build stuff
+*.spec
+/build/
+/dist/
+
+.venv

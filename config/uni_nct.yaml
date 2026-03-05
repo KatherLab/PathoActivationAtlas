@@ -1,0 +1,265 @@
+# Identifying string for naming folders, file names, ...
+name: "uni_nct"
+
+# Root folder for saving stuff
+save_root: "saved/"
+
+# Batch sizes for activation extraction
+extraction_batch_sizes:
+    atlas: 32
+    actgrid: 64
+    feature_search: 64
+    metrics: 32
+
+# Number of dataloader workers to use for activation extraction
+num_dataloader_workers: 8
+
+# Model to create activation atlases / class visualizations for
+model:
+    # Must be in _creator/models.py or torchvision.models
+    class_name: "UNI"
+    args:
+        num_classes: 9
+    # Use if your model's forward accepts arguments besides the input batch
+    extra_forward_args: # list
+    extra_forward_kwargs: # dict
+    # Should be false if you don't want to load from checkpoint_path (e.g. because it already happens
+    # during model construction)
+    load_checkpoint: true
+    checkpoint_path: "/path/to/model_checkpoint_dict.ckpt"
+    # In the checkpoint dictionary, which entry contains the model weights?
+    param_key: "state_dict"
+
+transformations:
+    # If true, get_transformations() is called on the model to retrieve transformations. If false,
+    # transformations need to be specified as seen below.
+    from_model: false
+    # Name of class in transformations.py with a list of transformations in member variable tfms.
+    # This list should NOT include normalization or transformation to a tensor yet.
+    class_name: "ResizeTransform"
+    args:
+        size: 224
+    norm:
+        apply_norm: true
+        mean: [0.485, 0.456, 0.406]
+        std:  [0.229, 0.224, 0.225]
+
+datasets:
+    atlas:
+        # Must be in datasets.py. Do *not* pass transform or class_names in the args
+        class_name: "ImageDataset"
+        args:
+            df_path: "config/NCT-CRC-HE-100K.csv"
+            path_col_name: "path"
+            label_col_name: "label"
+            # Mappings (column_name: [valid_value_0, ..., valid_value_n]) can optionally be defined here to
+            # only use the rows from df_path matching these conditions.
+            filter_cols:
+            img_root: "/path/to/NCT-CRC-HE-100K_parent_dir"
+
+# logit position to class name
+class_names: ["ADI", "BACK", "DEB", "LYM", "MUC", "MUS", "NORM", "STR", "TUM"]
+
+# Layers to generate data for.
+# - convolutional layers: value "conv"
+# - other layers: list of [dim1_pos, dim2_pos, ..., dimn_pos] as value.
+#   [bs, dim1, dim2, ..., dimn] denotes the output dimensionality of the layer.
+#   Each dim*_pos may be:
+#       - a list of numbers in [0, dim*-1]
+#       - a string f"{num_min}-{num_max}" denoting a range. num_max is exclusive.
+#       - string "all" as an alias for the maximum possible range
+#   As an example: layer_name: [[[0], "all"]] denotes a layer's class token (for most models that have one)
+layers:
+    # model.patch_embed.proj: ["conv"]
+    model.blocks.0: [ [[0], "all"] ]
+    model.blocks.1: [ [[0], "all"] ]
+    model.blocks.2: [ [[0], "all"] ]
+    model.blocks.3: [ [[0], "all"] ]
+    model.blocks.4: [ [[0], "all"] ]
+    model.blocks.5: [ [[0], "all"] ]
+    model.blocks.6: [ [[0], "all"] ]
+    model.blocks.7: [ [[0], "all"] ]
+    model.blocks.8: [ [[0], "all"] ]
+    model.blocks.9: [ [[0], "all"] ]
+    model.blocks.10: [ [[0], "all"] ]
+    model.blocks.11: [ [[0], "all"] ]
+    model.blocks.12: [ [[0], "all"] ]
+    model.blocks.13: [ [[0], "all"] ]
+    model.blocks.14: [ [[0], "all"] ]
+    model.blocks.15: [ [[0], "all"] ]
+    model.blocks.16: [ [[0], "all"] ]
+    model.blocks.17: [ [[0], "all"] ]
+    model.blocks.18: [ [[0], "all"] ]
+    model.blocks.19: [ [[0], "all"] ]
+    model.blocks.20: [ [[0], "all"] ]
+    model.blocks.21: [ [[0], "all"] ]
+    model.blocks.22: [ [[0], "all"] ]
+    model.blocks.23: [ [[0], "all"] ]
+    # model.head: [["all"]]
+
+# From which distribution are positions for conv activations drawn? Can be "uniform" or "normal".
+# normal is centered at the activation's spacial center, with a std dev of ~1/8 the activation width/height
+conv_activation_distribution: "normal"
+
+# Create cell thumbnails with sizes divided by these numbers for later use in the viewer.
+thumbnail_div_levels: [2, 4, 8, 16]
+
+
+####################### Activation atlas-exclusive settings ########################
+atlas_args:
+    # Create an atlas containing num_cells*num_cells generated images for each layer.
+    num_cells: 10
+    # Number of optimization steps for each cell image during feature inversion.
+    num_steps: 8192
+    # Batch size during feature inversion.
+    batch_size: 16
+    # Whiten convolutional features before feature inversion?
+    whiten_conv: true
+    # Whiten other features before feature inversion?
+    whiten_other: false
+    # Embedding method to use, "tsne" or "umap".
+    embedding: "tsne"
+    # embedding_args can specify:
+    # - arguments to umap.UMAP or sklearn.manifold.TSNE
+    # - min_percentile, max_percentile and relative_margin for clipping the resulting layout.
+    # Can also be left empty, there are default arguments.
+    embedding_args:
+    # Objective from _creator/objective_funcs.py to optimize during feature inversion.
+    # Options: "direction_neuron_cossim", "unscaled_cossim", "dot", "euclidean"
+    opt_objective: "euclidean"
+    # Arguments to the optimization objective. Defaults when left empty:
+    # - tv_factor, l1_factor = 0 (for total variation- and L1-regularization respectively)
+    # - cossim_pow = 4 (exponential factor for direction_neuron_cossim objective)
+    opt_objective_args:
+    # Optimizer to use during feature inversion. Leave the optimizer key empty to use lucent's default optimizer.
+    optimizer:
+        class_name: "AdamW" # any optimizer from torch.optim or _creator/optimizers.py
+        args:
+            lr: 0.01
+
+# Column names from df_path and what kind of data they contain (continuous/numeric or categorical).
+# Will record ground truth data per activation atlas cell for later use with the viewer:
+# - continuous columns: mean, stddev, median, min, max
+# - categorical columns: sample distribution
+extra_data_columns:
+    categorical: ["label"]
+    continuous: []
+
+####################### Class visualization-exclusive settings ########################
+class_vis_args:
+    # Name of the model layer that outputs classification logits.
+    logit_layer_name: "model.head"
+    # Will generate num_cells*num_cells many images for each class.
+    num_cells: 3
+    # Number of optimization steps per image.
+    num_steps: 1024
+    # Batch size during image optimization.
+    batch_size: 32
+    # Size of generated images in px-
+    invert_size: [224, 224]
+    # Objective from _creator/objective_funcs.py to optimize.
+    # Options: "cross_entropy", "max_raw_logit", "max_prob"
+    opt_objective: "max_raw_logit"
+    # Arguments to the optimization objective. Defaults when left empty:
+    # - tv_factor, l1_factor = 0 (for total variation- and L1-regularization respectively)
+    opt_objective_args:
+    # Optimizer for class optimization. Leave the optimizer key empty to use lucent's default optimizer.
+    optimizer:
+        class_name: "AdamW" # any optimizer from torch.optim or _creator/optimizers.py
+        args:
+            lr: 0.01
+
+
+####################### Metric calculation-exclusive settings #######################
+metrics:
+    # Which metrics to calculate. Possible options (use any combination of these):
+    # - dreamsim:                               dreamsim distance as introduced in the dreamsim publication.
+    # - mahalanobis:                            calculates (squared) mahalanobis distances based on features extracted
+    #                                           with the models listed under the metrics->models key.
+    # - lpips_nolin:                            calculates lpips-ish distances based on features extracted with the
+    #                                           models listed under the metrics->models key. This variant does
+    #                                           *not* refine the features with any visual linear weights.
+    # - mahalanobis_vis or lpips_nolin_vis:     same as above, but uses the model used for image generation for
+    #                                           feature extraction
+    # - lpips_alex, lpips_vgg, lpips_squeeze:   lpips (with visual linear weights) using alex, vgg or squeezenet
+    #                                           respectively as the feature extractor. The weights, layer choices, etc.
+    #                                           are from the original LPIPS publication.
+    to_calculate: [
+        dreamsim, mahalanobis, mahalanobis_vis, lpips_nolin, lpips_nolin_vis, lpips_alex
+    ]
+
+    # If true: remove cached metric activations after successful run. Default: true
+    cleanup: false
+    # If true: calculate metrics even if their key already exists (i.e. overwrite the previous values).
+    # Default: false.
+    overwrite: true
+
+    # Format:   some_model_id: <normal model entry>
+    # The models provided here will be used for Mahalanobis and lpips_nolin distances.
+    # Mandatory if "mahalanobis" or "lpips_nolin" in metrics>to_calculate, can be left empty otherwise.
+    # The models here are configured in the same way as the visualized model under the "model"-key further up.
+    models:
+        ProvGigaPath:
+            # Must be in models.py or torchvision.models
+            class_name: "ProvGigaPath"
+            args:
+            extra_forward_args: # list
+            extra_forward_kwargs: # dict
+            load_checkpoint: false
+        HOptimus0:
+            class_name: "HOptimus0"
+            args:
+            extra_forward_args: # list
+            extra_forward_kwargs: # dict
+            load_checkpoint: false
+        #Virchow2:
+        #    class_name: "Virchow2"
+        #    args:
+        #    extra_forward_args: # list
+        #    extra_forward_kwargs:
+        #        retval: "emb"      # options: "emb", "full", "class" - check _creator/models.py for details.
+        #    load_checkpoint: false
+
+    # format:   some_model_id: <normal transformations entry>
+    # - One entry for each model listed under metrics>models
+    # - Some models come with their own transformations (check _creator/models.py), if so you can (and
+    # probably should) just specify from_model: true
+    transformations: # <- mandatory if mahalanobis or lpips_nolin in to_calculate, otherwise unused
+        ProvGigaPath:
+            from_model: true
+        HOptimus0:
+            from_model: true
+        Virchow2:
+            from_model: true
+
+    lpips_size: 224 # image height/width for lpips_{alex, vgg, squeeze}
+
+    # Real image data to calculate the metrics against - formatted like the general dataset key further up.
+    dataset:
+        class_name: "ImageDataset"
+        args:
+            df_path: "config/CRC-VAL-HE-7K.csv"
+            path_col_name: "path"
+            label_col_name: "label"
+            filter_cols:
+            img_root: "/path/to/CRC-VAL-HE-7K_parent_dir"
+
+    # Model layers to extract features from for metric calculation.
+    layers:
+        # lists with a *single* entry each - should probably be the layer right before classification to avoid running OOM
+        mahalanobis:
+            vis_model: ["model.fc_norm"] # vis_model refers to the model specified under the general model key
+            ProvGigaPath: ["model.head"]
+            HOptimus0: ["model.head"]
+            Virchow2: ["embhead"]
+            #other_model_id_goes_here: []
+        # lists with potentially multiple entries
+        lpips_nolin:
+            vis_model: ["model.patch_embed.proj", "model.blocks.13", "model.fc_norm"]
+            ProvGigaPath: ["model.blocks.0", "model.head"]
+            HOptimus0: ["model.blocks.0", "model.head"]
+            Virchow2: ["model.blocks.0", "embhead"]
+            #other_model_id_goes_here: []
+
+    # How many nearest neighbors to consider for methods that support it (i.e. not mahalanobis)
+    num_nn: 32

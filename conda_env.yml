@@ -1,0 +1,31 @@
+name: activation-atlas
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pytorch=2.0.1
+  - torchvision=0.15.2
+  - pytorch-cuda
+  - numpy<2
+  - timm
+  - scikit-learn
+  - matplotlib
+  - pandas
+  - opencv
+  - cachetools
+  - tqdm
+  - pillow
+  - pyqt=5.*
+  - mkl<2024.1 # https://github.com/pytorch/pytorch/issues/123097
+  - transformers<=4.49.0 # incompatible with torch 2.0.1 otherwise
+  - pip:
+      - torch-lucent
+      - dreamsim
+      - lpips
+      - umap-learn
+      - natsort
+      - qutepart

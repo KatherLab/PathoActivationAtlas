@@ -1,0 +1,6 @@
+{
+    "n_splits": 5,
+    "random_state": 42,
+    "train_csv": "../datasets/NCTCRC.csv",
+    "test_csv": "../datasets/NCTCRCVAL.csv"
+}

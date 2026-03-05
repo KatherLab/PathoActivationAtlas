@@ -2,6 +2,10 @@
 
 This repository contains the code to reproduce the experiments in the paper.
 
+> [!IMPORTANT]
+>
+> WIP! For model training, please refer to the `modeling` directory in this repository!
+
 ## Setup
 
 Use conda to setup this project's python environment:

@@ -1,0 +1,51 @@
+[project]
+name = "activation-atlas"
+version = "0.1.0"
+description = "Activation Atlas environment"
+requires-python = "==3.11.*"
+
+dependencies = [
+  # PyTorch stack (versions from your conda env)
+  "torch==2.0.1",
+  "torchvision==0.15.2",
+
+  # Core scientific stack
+  "numpy<2",
+  "pandas",
+  "scikit-learn",
+  "matplotlib",
+
+  # Model/vision utils
+  "timm",
+  "transformers<=4.49.0",
+
+  "opencv-python",
+  "cachetools",
+  "tqdm",
+  "pillow",
+
+  # Qt GUI bits
+  "PyQt5==5.*",
+
+  "mkl<2024.1",
+]
+
+[dependency-groups]
+# Your "pip:" subsection from the conda YAML
+pip-extras = [
+  "torch-lucent",
+  "dreamsim",
+  "lpips",
+  "umap-learn",
+  "natsort",
+  "qutepart",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu118", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cu118", marker = "sys_platform == 'linux'" }]
