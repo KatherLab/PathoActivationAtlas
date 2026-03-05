@@ -2,6 +2,8 @@
 
 This repository contains the code to reproduce the experiments in the paper.
 
+![Actiation Atlas](assets/atlas.png)
+
 > [!IMPORTANT]
 >
 > WIP! For model training, please refer to the `modeling` directory in this repository!
