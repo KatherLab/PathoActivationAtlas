@@ -50,4 +50,6 @@ Start the viewer via `python view.py`. Click on "Open new file", navigate to a p
 
 ## License
 
-This project includes third-party code from Captum (PyTorch), licensed under the BSD 3-Clause License. See `LICENSES/BSD-3-Clause-Captum.txt`
+Unless otherwise noted, this project is licensed under the MIT License (see `LICENSE`).
+
+This project includes third-party code derived from Captum (PyTorch), licensed under the BSD 3-Clause License. See `LICENSES/BSD-3-Clause-Captum.txt`.
